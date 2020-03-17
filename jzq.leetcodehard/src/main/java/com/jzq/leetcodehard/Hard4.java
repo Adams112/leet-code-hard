@@ -33,50 +33,24 @@ class Solution {
     	}
     	
     	int l = -1, h = arr1.length + 1, m1 = (l + h) / 2, m2, t = arr1.length + arr2.length, n1, n2;
-    	if ((arr1.length + arr2.length) % 2 == 0) {
-    		for (;;) {
-    			m2 = t / 2 - m1;
-    			
-    			if (m1 == 0) n2 = arr2[m2 - 1];
-    			else if (m2 == 0) n2 = arr1[m1 - 1];
-    			else n2 = Integer.max(arr1[m1 - 1], arr2[m2 - 1]);
-    			
-    			if (m1 == arr1.length) n1 = arr2[m2];
-    			else if (m2 == arr2.length) n1 = arr1[m1];
-    			else n1 = Integer.min(arr1[m1], arr2[m2]);
-    			
-    			if (n1 >= n2) {
-    				return (n1 + n2) / 2.0;
-    			} else if (m1 - 1 >= 0 && m2 < arr2.length && arr1[m1 - 1] > arr2[m2]) {
-    				h = m1;
-    				m1 = (l + h) / 2;
-    			} else {
-    				l = m1;
-    				m1 = (l + h) / 2;
-    			}
-    		}
-    	} else {
-    		for (;;) {
-    			m2 = t / 2 - m1 + 1;
-    			
-    			if (m1 == 0) n2 = arr2[m2 - 1];
-    			else if (m2 == 0) n2 = arr1[m1 - 1];
-    			else n2 = Integer.max(arr1[m1 - 1], arr2[m2 - 1]);
-    			
-    			if (m1 == arr1.length) n1 = arr2[m2];
-    			else if (m2 == arr2.length) n1 = arr1[m1];
-    			else n1 = Integer.min(arr1[m1], arr2[m2]);
-    			if (n1 >= n2) {
-    				return n2;
-    			} else if (m1 - 1 >= 0 && m2 < arr2.length && arr1[m1 - 1] > arr2[m2]) {
-    				h = m1;
-    				m1 = (l + h) / 2;
-    			} else {
-    				l = m1;
-    				m1 = (l + h) / 2;
-    			}
-    		}
+    	boolean isOdd = (arr1.length + arr2.length) % 2 == 0;
+    	for (;;) {
+    		m2 = isOdd ? t / 2 - m1 : t / 2 - m1 + 1;
     		
+    		if (m1 == 0) n2 = arr2[m2 - 1];
+			else if (m2 == 0) n2 = arr1[m1 - 1];
+			else n2 = Integer.max(arr1[m1 - 1], arr2[m2 - 1]);
+			if (m1 == arr1.length) n1 = arr2[m2];
+			else if (m2 == arr2.length) n1 = arr1[m1];
+			else n1 = Integer.min(arr1[m1], arr2[m2]);
+			
+			if (n1 >= n2) {
+				return isOdd ? (n1 + n2) / 2.0 : n2;
+			} else if (m1 - 1 >= 0 && m2 < arr2.length && arr1[m1 - 1] > arr2[m2]) 
+				h = m1;
+			else
+				l = m1;
+			m1 = (l + h) / 2;
     	}
     }
     
