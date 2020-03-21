@@ -6,7 +6,6 @@ import java.util.PriorityQueue;
 public class Hard23 {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
 	}
 	

@@ -7,109 +7,116 @@ import java.util.List;
 public class Hard37 {
 
 	public static void main(String[] args) {
-
+			char[][] ch = {{'5','3','.','.','7','.','.','.','.'},{'6','.','.','1','9','5','.','.','.'},{'.','9','8','.','.','.','.','6','.'},{'8','.','.','.','6','.','.','.','3'},{'4','.','.','8','.','3','.','.','1'},{'7','.','.','.','2','.','.','.','6'},{'.','6','.','.','.','.','2','8','.'},{'.','.','.','4','1','9','.','.','5'},{'.','.','.','.','8','.','.','7','9'}};
+			new Hard37().new Solution().solveSudoku(ch);
 	}
 	
 	class Solution {
+		List<Integer> list = Arrays.asList(~1, ~2, ~4, ~8, ~16, ~32, ~64, ~128, ~256);
 	    public void solveSudoku(char[][] board) {
-	        Node[][] b = new Node[board.length][board[0].length];
-	        List<Character> l = Arrays.asList('1', '2', '3', '4', '5', '6', '7', '8', '9');
-	        for (int i = 0; i < board.length; i++) {
-	        	for (int j = 0; j < board[0].length; j++) {
-	        		if (board[i][j] == '.') {
-	        			b[i][j] = new Node(new ArrayList<Character>(l));
-	        		} else {
-	        			b[i][j] = new Node(board[i][j]);
-	        		}
+	        int[][] b = new int[9][9];
+	        int min = Integer.MIN_VALUE, all = min | 511;
+	        for (int i = 0; i < 9; i++) {
+	        	for (int j = 0; j < 9; j++) {
+	        		if (board[i][j] == '.')
+	        			b[i][j] = all;
+	        		else
+	        			b[i][j] = board[i][j] - '1';
 	        	}
 	        }
 	        
+	        if (soleve0(b)) {
+	        	for (int i = 0; i < 9; i++) {
+	        		for (int j = 0; j < 9; j++) {
+	        			board[i][j] = (char) (b[i][j] + '1');
+	        		}
+	        	}
+	        }
 	    }
 	    
-	    private boolean solveSudoku0(Node[][] b) {
-	    	boolean needTraceBack = true;
+	    private boolean soleve0(int[][] b) {
+	    	
 	    	for (;;) {
-	    		needTraceBack = true;
-	    		int uniqueCount = 0;
-	    		for (int i = 0; i < b.length; i++) {
-	    			for (int j = 0; j < b[0].length; j++) {
-	    				if (b[i][j].unique) {
-	    					uniqueCount++;
-	    					continue;
-	    				}
-	    				
-	    				remove9(b, i, j);
-	    				removeCol(b, i, j);
-	    				removeRow(b, i, j);
-	    				
-	    				if (b[i][j].list.size() == 1) {
-	    					b[i][j] = new Node(b[i][j].list.get(0));
-	    					uniqueCount++;
-	    					needTraceBack = false;
-	    				} else if (b[i][j].list.size() == 0)
-	    					return false;
-	    			}
-	    		}
-	    		
-	    		if (uniqueCount == 81) return true;
-	    		
-	    		if (needTraceBack) {
-	    			int i = 0, j = 0;
-	    			outer: for (; i < b.length; i++) {
-		    			for (; j < b[0].length; j++) {
-		    				if (!b[i][j].unique) break outer;
+	    		boolean needTraceBack = true;
+	    		int cnt = 0;
+		    	for (int i = 0; i < 9; i++) {
+		    		for (int j = 0; j < 9; j++) {
+		    			if (b[i][j] >= 0) cnt++;
+		    			else {
+		    				int r = (i / 3) * 3, c = (j / 3) * 3;
+		    				for (int p = 0; p < 3; p++) {
+		    					for (int q = 0; q < 3; q++) {
+		    						if (b[r + p][c + q] > 0) {
+		    							b[i][j] &= list.get(b[r + p][c + q]);
+		    						}
+		    					}
+		    				}
+		    				for (int p = 0; p < 9; p++) {
+		    					if (b[i][p] >= 0) {
+		    						b[i][j] &= list.get(b[i][p]);
+		    					}
+		    					if (b[p][j] >= 0) {
+		    						b[i][j] &= list.get(b[p][j]);
+		    					}
+		    				}
+		    				if (b[i][j] == Integer.MIN_VALUE) return false;
+		    				
+		    				int index = list.indexOf(~(b[i][j] & Integer.MAX_VALUE));
+		    				if (index >= 0) {
+		    					cnt++;
+		    					b[i][j] = index;
+		    					needTraceBack = false;
+		    				}
 		    			}
-	    			}
-	    			
-	    			List<Character> list = b[i][j].list;
-	    			
-	    			for (Character c: list) {
-	    				b[i][j] = new Node(c);
+		    		}
+		    	}
+		    	
+		    	if (cnt == 81) return true;
+		    	if (needTraceBack) break;
+	    	}
+	    	
+	    	int[][] tmp = new int[9][9];
+	    	for (int i = 0; i < 9; i++) {
+	    		for (int j = 0; j < 9; j++) {
+	    			tmp[i][j] = b[i][j];
+	    		}
+	    	}
+	    	
+	    	int ti = 0, tj = 0, possibleCnt = 10;
+	    	for (int p = 0; p < 9; p++) {
+	    		for (int q = 0; q < 9; q++) {
+	    			if (b[p][q] < 0) {
+	    				int pcnt = 0, bit = 1;
+	    				for (int i = 0; i < 9; i++) {
+	    					if ((b[p][q] & bit) > 0) {
+	    						pcnt++;
+	    					}
+	    					bit <<= 1;
+	    				}
+	    				if (pcnt < possibleCnt) {
+	    					ti = p;
+	    					tj = q;
+	    					possibleCnt = pcnt;
+	    				}
 	    			}
 	    		}
 	    	}
-	    }
-	    
-	    
-	    
-	    private void remove9(Node[][] b, int i, int j) {
-	    	int r = (i / 3) * 3, c = (j / 3) * 3;
-	    	List<Character> list = b[i][j].list;
-	    	for (int p = 0; p < 3; p++) {
-	    		for (int q = 0; q < 3; q++) {
-	    			Node n = b[r + p][c + q];
-	    			if (n.unique) {
-	    				list.remove((Character) n.val);
+	    	
+	    	int possibleValue = b[ti][tj] & Integer.MAX_VALUE;
+	    	for (int i = 0; i < 9; i++) {
+	    		if ((possibleValue & (1 << i)) != 0) {
+	    			b[ti][tj] = i;
+	    			if (soleve0(b)) return true;
+	    			
+	    			for (int p = 0; p < 9; p++) {
+	    				for (int q = 0; q < 9; q++) {
+	    					b[p][q] = tmp[p][q];
+	    				}
 	    			}
 	    		}
 	    	}
-	    }
-	    
-	    private void removeRow(Node[][] b, int i, int j) {
-	    	List<Character> list = b[i][j].list;
-	    	for (int p = 0; p < 9; p++) {
-	    		Node n = b[i][p];
-	    		if (n.unique)
-	    			list.remove((Character) n.val);
-	    	}
-	    }
-	    
-	    private void removeCol(Node[][] b, int i, int j) {
-	    	List<Character> list = b[i][j].list;
-	    	for (int p = 0; p < 9; p++) {
-	    		Node n = b[p][j];
-	    		if (n.unique)
-	    			list.remove((Character) n.val);
-	    	}
+	    	
+	    	return false;
 	    }
 	}
-	
-	static class Node {
-		boolean unique;
-		char val;
-		List<Character> list;
-		Node(char val) {unique = true; this.val = val;}
-		Node(List<Character> list) {unique = false; this.list = list;}
-	}
-
 }
